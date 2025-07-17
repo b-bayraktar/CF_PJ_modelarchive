@@ -188,6 +188,8 @@ trash_*
 
 Thumbs.db
 
+modflow/port_jeff/*
+
 swmm/greenport/*.out
 swmm/greenport/*.rpt
 
