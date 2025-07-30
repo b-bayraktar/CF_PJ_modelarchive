@@ -193,3 +193,5 @@ modflow/port_jeff/*
 swmm/greenport/*.out
 swmm/greenport/*.rpt
 
+dflow-fm/coarse/tides/FlowFM_map.nc
+dflow-fm/coarse/tides/FlowFM_map.nc

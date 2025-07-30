@@ -5,3 +5,9 @@ Step 2: Run ".\step1a_calculate_dflow2mfghb_factors.ipynb" notebook
 Step 3: Run ".\step1b_calculate_dflow2mfchd_factors.ipynb" notebook
 
 Step 4: Run ".\step2_run_dflow-modflow_variable_dt.ipynb" notebook
+
+
+Notes & troubleshooting tips: 
+- Coupling MF with Dflow requires 2 CHD packages - one of them specific to the cells that will be coupled.
+- Dflow-FM grid must completely overlap all Modflow cells that are to be coupled. Otherwise, kernel crashes when coupling.
+- Kernel may crash if there are too many DLLs in that directory? I can't remember the issue exactly but Kalle and Liv know. 
