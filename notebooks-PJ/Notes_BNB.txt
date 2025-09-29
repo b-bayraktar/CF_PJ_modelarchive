@@ -21,7 +21,11 @@ chd_coastal_obs.csv
 Observation Type (obstype): CHD = Flow between the groundwater system and a constant-head boundary or a group of cells with constant-head boundaries.
 
 questions:
-
 -in an obs.csv negative means water is entering the GHB/CHD from the model, right? so a negative means the cell is gaining water?
 - The total GHB exchange is variable , while the total CHD exchange stays constant... Why does summing all the chds even out? If you look at individual CHDs, you can see the exchange
 - model loses A LOT more water to CHD than GHB
+
+
+9/16/2025
+- MF + Dflow + SWMM are coupled for PJ 
+- Figure with the difference in coastal water level with and without atmospheric inputs is in the figures directory.
