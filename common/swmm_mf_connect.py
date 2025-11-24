@@ -1,9 +1,10 @@
 import itertools
 import geopandas as gpd
+import pandas as pd
 import pyswmm
 import flopy
 
-def intersect_points_grid(sim_ws=None, swmm_pth=None, pts_pth=None, grid_poly=None, n_junctions=12, crs='epsg:4456'):
+def intersect_points_grid(sim_ws=None, swmm_pth=None, pts_pth=None, pts_name_col='Name', grid_poly=None, n_junctions=1000, crs='epsg:4456'):
     '''
     Intersects specified points with a grid polygon and retrieves information about junctions.
 
@@ -50,7 +51,31 @@ def intersect_points_grid(sim_ws=None, swmm_pth=None, pts_pth=None, grid_poly=No
     grid_poly = mg.geo_dataframe.set_crs(crs)
     
     grid_poly['cid'] = [(r, c) for r,c in itertools.product(range(mg.nrow), range(mg.ncol))]
+    # we could update this to be in other layers 
     grid_poly['bot01'] = mg.botm[1].ravel()
+
+#----------------------------------------------------------------
+    bnds = pd.Dataframe()
+    bnds['idom'] = mg.idomain[0].flatten()
+    bnds['top'] = mg.top.flatten()
+    for i,arr in enumerate(mg.botm):
+        bnds[f'bot{i+1:02d}'] = arr.flatten()
+    # import the shapefile with x + y provided by VP
+    path = '../swmm/PJ/PJ_Sewer_GIS/Junctions.shp'
+    junctions_shp = gpd.read_file(path)
+    junctions_shp=junctions_shp.to_crs(epsg=4456)
+    junctions_shp.to_file('../swmm/PJ/PJ_Sewer_GIS/Juntions_4456.shp')
+
+    with pyswmm.Simulation(str(swmm_pth)) as swmm_sim:
+        # some shapefile junctions might not be in SWMM? 
+        junction_name = [n.nodeid for n in pyswmm.Nodes(swmm_sim)]
+        junction_elev = [n.invert_elevation for n in pyswmm.Nodes(swmm_sim)]
+        # confirm with the .inp file that this is correct
+        junction_df = pd.DataFrame({'Name':junction_name, 'elev_navd88':junction_elev})
+    junction_df = junctions_shp.merge(junction_df, on ='Name')
+
+
+#--------------
     
     pts = gpd.read_file(pts_pth).to_crs(grid_poly.crs)
 
@@ -59,7 +84,7 @@ def intersect_points_grid(sim_ws=None, swmm_pth=None, pts_pth=None, grid_poly=No
     with pyswmm.Simulation(str(swmm_pth)) as swmm_sim:
         # some shapefile junctions might not be in SWMM? 
         swmm_junctions = [n.nodeid for n in pyswmm.Nodes(swmm_sim)]
-        possible_junctions = pts.loc[pts['Name'].isin(swmm_junctions)].copy()
+        possible_junctions = pts.loc[pts[pts_name_col].isin(swmm_junctions)].copy()
         possible_junctions['invert_elev_ft'] = [n.invert_elevation * m_to_ft for n in pyswmm.Nodes(swmm_sim) if n.nodeid in possible_junctions['Name'].tolist()]
 
     if n_junctions > len(possible_junctions):
@@ -77,7 +102,7 @@ def intersect_points_grid(sim_ws=None, swmm_pth=None, pts_pth=None, grid_poly=No
     # swmm_nodes = mf6_swmm_connect['swmm_node'].to_dict()
     swmm_inverts = mf6_swmm_connect['invert_elev_ft'].to_dict()
 
-    return n_junctions, selected_junctions['Name'].tolist(), mf6_cells, swmm_inverts
+    return n_junctions, selected_junctions['Name'].tolist(), mf6_cells, swmm_inverts, possible_junctions
 
 if __name__ == 'main':
     intersect_points_grid()

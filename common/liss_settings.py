@@ -62,7 +62,7 @@ def set_title_string(date_time):
     return f"{s}:00:00"
 
 def get_modflow_grid_name():
-    return "greenport_chd"
+    return "PJmf6"
 
 def print_path():
     if _verbose:
