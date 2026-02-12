@@ -1,7 +1,0 @@
-BEGIN OPTIONS
-END OPTIONS
-
-BEGIN CONTINUOUS FILEOUT gwf.chd.obs.csv
-  perimeter   chd perimeter
-  coastal     chd coastal
-END CONTINUOUS
